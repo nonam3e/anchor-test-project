@@ -5,36 +5,99 @@ declare_id!("9ex26jHoJ3mvNzHhRTBXGyjbkXQXQX28HfZW8hPC6LM7");
 #[program]
 pub mod anchor_test_project {
     use super::*;
-    pub fn create(ctx: Context<Create>) -> Result<()> {
-        let base_account = &mut ctx.accounts.base_account;
-        base_account.count = 0;
+
+
+    pub fn initialize(ctx: Context<Initialize>) -> anchor_lang::Result<()> {
+        let data_account = &mut ctx.accounts.data_account;
+        let crowd_account = &mut ctx.accounts.crowd_account;
+        let admin_account = ctx.accounts.admin_account;
+        crowd_account.owner = admin_account.signer_key;
+        data_account.owner = crowd_account.key;
+
         Ok(())
     }
 
-    pub fn increment(ctx: Context<Increment>) -> Result<()> {
-        let base_account = &mut ctx.accounts.base_account;
-        base_account.count+=1;
-        Ok(())
+    pub fn donate(ctx: Context<Donate>, lamports: &[u8]) -> anchor_lang::Result<()> {
+        let data_account = &mut ctx.accounts.data_account;
+        let patron_account = &mut ctx.account.patron_account;
+        let crowd_account = &mut ctx.accounts.crowd_account;
+        let sol_transfer = anchor_lang::solana_program::system_instruction::transfer(
+            &ctx.accounts.patron_account.key,
+            &ctx.accounts.crowd_account.key,
+            lamports,
+        );
+        let result = invoke(
+            &sol_transfer,
+            &[
+                ctx.accounts.patron_account.clone(),
+                ctx.accounts.crowd_account.clone(),
+                ctx.accounts.system_program.clone(),
+            ],
+        )?;
+        if result == Ok(()) {
+            data_account.data_list.push(format!("Account {} sent {} lamports", &patron_account.key, &lamports));
+        }
+        result
     }
+
+    pub fn withdraw(ctx: Context<Withdraw>, lamports: &[u8]) -> anchor_lang::Result<()> {
+        let data_account = &mut ctx.accounts.data_account;
+        let crowd_account = &mut ctx.accounts.crowd_account;
+        let admin_account = &mut ctx.accounts.admin_account;
+        let sol_transfer = anchor_lang::solana_program::system_instruction::transfer(
+            &ctx.accounts.crowd_account.key,
+            &ctx.accounts.admin_account.key,
+            lamports,
+        );
+        let result = invoke(
+            &sol_transfer,
+            &[
+                ctx.accounts.crowd_account.clone(),
+                ctx.accounts.admin_account.clone(),
+                ctx.accounts.system_program.clone(),
+            ],
+        )?;
+        if result == Ok(()) {
+            data_account.data_list.push(format!("{} lamports withdrew to admin", &lamports));
+        }
+        result
+    }
+}
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(init, payer = admin_account, space = 64 + 64)] //can I use zero instead?
+    pub data_account: Account<'info, DataAccount>,
+    pub admin_account: Signer<'info>,
+    #[account(mut)]
+    pub crowd_account: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 
 #[derive(Accounts)]
-pub struct Create<'info> {
-    #[account(init, payer = user, space = 16 + 16)]
-    pub base_account: Account <'info, BaseAccount>,
+pub struct Donate {
+    #[account(mut, owner = crowd_account)]
+    pub data_account: Account<'info, DataAccount>,
     #[account(mut)]
-    pub user: Signer<'info>,
-    pub system_program: Program <'info, System>,
+    pub patron_account: Signer<'info>,
+    #[account(mut)]
+    pub crowd_account: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
 }
 
-#[derive(Accounts)]
-pub struct Increment<'info> {
+#[derive(Account)]
+pub struct Withdraw {
+    #[account(mut, owner = admin_account)]
+    pub crowd_account: AccountInfo<'info>,
     #[account(mut)]
-    pub base_account: Account <'info, BaseAccount>,
+    pub admin_account: AccountInfo<'info>,
+    #[account(mut)]
+    pub data_account: Account<'info, DataAccount>,
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
-pub struct BaseAccount {
-    pub count: u64,
+pub struct DataAccount {
+    pub data_list: Vec<String>,
 }
