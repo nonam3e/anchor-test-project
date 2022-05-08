@@ -35,13 +35,13 @@ describe("anchor-test-project", () => {
         assert.ok(account.ownerId.toString() === crowdAccount.publicKey.toString());
         _crowdAccount = crowdAccount;
         _dataAccount = dataAccount;
-        _lamports = check.lamports;
+        _lamports = new anchor.BN(check.lamports);
     });
 
     it("transfer lamports", async () => {
 
 
-        await program.rpc.donate(new anchor.BN(1234), {
+        await program.rpc.donate(new anchor.BN(1235444), {
             accounts: {
                 crowdAccount: crowdAccount.publicKey,
                 patronAccount: provider.wallet.publicKey,
@@ -49,7 +49,8 @@ describe("anchor-test-project", () => {
                 systemProgram: SystemProgram.programId,
             },
         });
-        assert.ok(true);
+        const check = await program.account.crowdAccount.fetch(crowdAccount.publicKey);
+        assert.ok((new anchor.BN(check.lamports)).cmp(_lamports)==0);
         // const checkpatr = await program.account.patronAccount.fetch(patronAccount.publicKey);
 
     });

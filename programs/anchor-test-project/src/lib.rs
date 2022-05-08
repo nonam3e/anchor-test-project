@@ -22,7 +22,7 @@ pub mod anchor_test_project {
         let crowd_account = &mut ctx.accounts.crowd_account;
         let system_program = ctx.accounts.system_program.to_account_info();
         let to_trans = anchor_lang::system_program::Transfer{from: patron_account.to_account_info(), to: crowd_account.to_account_info()};
-        anchor_lang::system_program::transfer(anchor_lang::context::CpiContext::new(system_program, to_trans), fn_lamports);
+        anchor_lang::system_program::transfer(anchor_lang::context::CpiContext::new(system_program, to_trans), fn_lamports).unwrap();
 
         let output = format!("Account {} sent {} lamports", &patron_account.unsigned_key(), fn_lamports);
 
