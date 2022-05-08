@@ -4,42 +4,43 @@ const { SystemProgram } = anchor.web3;
 
 describe("anchor-test-project", () => {
   /* create and set a Provider */
-  const provider = anchor.AnchorProvider.env();
+  const provider = anchor.AnchorProvider.local();
   anchor.setProvider(provider);
-  const program = anchor.workspace.AnchorTestProject;
+  
+  it("It initializes accounts", async () => {
+      const dataAccount = anchor.web3.Keypair.generate();
+      const crowdAccount = anchor.web3.Keypair.generate();
+      const program = anchor.workspace.AnchorTestProject;
 
-  it("It initializes the account", async () => {
-    const baseAccount = anchor.web3.Keypair.generate();
-    await program.rpc.initialize("Hello World", {
-      accounts: {
-        baseAccount: baseAccount.publicKey,
-        user: provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [baseAccount],
-    });
+      await program.rpc.initialize({
+          accounts: {
+              crowdAccount: crowdAccount.publicKey,
+              adminAccount: provider.wallet.publicKey,
+              systemProgram: SystemProgram.programId,
+              dataAccount: dataAccount.publicKey,
+          },
+          signers: [dataAccount],
+      });
 
-    const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    console.log('Data: ', account.data);
-    assert.ok(account.data === "Hello World");
-    _baseAccount = baseAccount;
-
+    // const account = await program.account.dataAccount.fetch(dataAccount.publicKey);
+    assert.ok();
+    // assert.ok(account.data_list[0].eq("Success"));
   });
 
-  it("Updates a previously created account", async () => {
-    const baseAccount = _baseAccount;
-
-    await program.rpc.update("Some new data", {
-      accounts: {
-        baseAccount: baseAccount.publicKey,
-      },
-    });
-
-    const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    console.log('Updated data: ', account.data)
-    assert.ok(account.data === "Some new data");
-    console.log('all account data:', account)
-    console.log('All data: ', account.dataList);
-    assert.ok(account.dataList.length === 2);
-  });
+  // it("Updates a previously created account", async () => {
+  //   const baseAccount = _baseAccount;
+  //
+  //   await program.rpc.update("Some new data", {
+  //     accounts: {
+  //       baseAccount: baseAccount.publicKey,
+  //     },
+  //   });
+  //
+  //   const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+  //   console.log('Updated data: ', account.data)
+  //   assert.ok(account.data === "Some new data");
+  //   console.log('all account data:', account)
+  //   console.log('All data: ', account.dataList);
+  //   assert.ok(account.dataList.length === 2);
+  // });
 });
