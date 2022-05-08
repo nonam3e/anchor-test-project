@@ -9,10 +9,10 @@ pub mod anchor_test_project {
     pub fn initialize(ctx: Context<Initialize>) -> anchor_lang::Result<()> {
         let data_account = &mut ctx.accounts.data_account;
         let crowd_account = &mut ctx.accounts.crowd_account;
-        let admin_account = &mut ctx.accounts.admin_account;
-        // crowd_account.owner_id = admin_account.signer_key().unwrap().clone();
-        // data_account.owner_id = crowd_account.key().clone();
-        // data_account.data_list.push(String::from("Success"));
+        let admin_account = & ctx.accounts.admin_account;
+        crowd_account.owner_id = admin_account.signer_key().unwrap().clone();
+        data_account.owner_id = crowd_account.key().clone();
+        data_account.data_list.push(String::from("Success"));
         Ok(())
     }
 

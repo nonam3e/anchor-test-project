@@ -6,7 +6,7 @@ describe("anchor-test-project", () => {
   /* create and set a Provider */
   const provider = anchor.AnchorProvider.local();
   anchor.setProvider(provider);
-  
+
   it("It initializes accounts", async () => {
       const dataAccount = anchor.web3.Keypair.generate();
       const crowdAccount = anchor.web3.Keypair.generate();
@@ -19,11 +19,11 @@ describe("anchor-test-project", () => {
               systemProgram: SystemProgram.programId,
               dataAccount: dataAccount.publicKey,
           },
-          signers: [dataAccount],
+          signers: [crowdAccount,dataAccount],
       });
 
     // const account = await program.account.dataAccount.fetch(dataAccount.publicKey);
-    assert.ok();
+    assert.ok(true);
     // assert.ok(account.data_list[0].eq("Success"));
   });
 
