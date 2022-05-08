@@ -22,9 +22,12 @@ describe("anchor-test-project", () => {
           signers: [crowdAccount,dataAccount],
       });
 
-    // const account = await program.account.dataAccount.fetch(dataAccount.publicKey);
-    assert.ok(true);
-    // assert.ok(account.data_list[0].eq("Success"));
+    const account = await program.account.dataAccount.fetch(dataAccount.publicKey);
+    const check = await program.account.crowdAccount.fetch(crowdAccount.publicKey)
+    console.log('All data: ', account.dataList);
+    assert.ok(account.dataList[0] === ("Success"));
+    assert.ok(check.ownerId.toString() === provider.wallet.publicKey.toString())
+    assert.ok(account.ownerId.toString() === crowdAccount.publicKey.toString());
   });
 
   // it("Updates a previously created account", async () => {
