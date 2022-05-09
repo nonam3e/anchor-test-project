@@ -31,8 +31,7 @@ describe("anchor-test-project", () => {
         const check = await program.account.crowdAccount.fetch(crowdAccount.publicKey);
         console.log('All data: ', account.dataList);
         assert.ok(account.dataList[0] === ("Created"));
-        assert.ok(check.ownerId.toString() === provider.wallet.publicKey.toString());
-        assert.ok(account.ownerId.toString() === crowdAccount.publicKey.toString());
+        assert.ok(account.ownerId.toString() === provider.wallet.publicKey.toString());
         _lamports = new anchor.BN(check.lamports);
     });
 
@@ -55,11 +54,12 @@ describe("anchor-test-project", () => {
     });
 
     it("from crowd to admin", async () => {
+        const eva_account = anchor.web3.Keypair.generate();
 
         await program.rpc.withdraw(new anchor.BN(12354), {
             accounts: {
                 crowdAccount: crowdAccount.publicKey,
-                adminAccount: provider.wallet.publicKey,
+                adminAccount: eva_account.publicKey,
                 dataAccount: dataAccount.publicKey,
                 systemProgram: SystemProgram.programId,
             },
